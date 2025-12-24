@@ -1,0 +1,33 @@
+name: CI Pipeline
+
+# Quando rodar? A cada push na branch main
+on:
+  push:
+    branchs: ["main"]
+  pull_requests:
+    branches: ["main"]
+
+jobs:
+  # Job 1: Garantir que o código Go compila
+  test-go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configurar Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+
+      - name: Verificar código (Build Test)
+        run: go build -v ./..
+
+    # Job 2: Garantir que o Docker Build funciona
+    build-docker:
+      needs: test-go
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+
+        - name: Build da Imagem Docker
+          run: docker build . --file Dockerfile --tag health-check:ci-test
